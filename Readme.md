@@ -44,16 +44,16 @@ matter:
 ## Usage
 
 ```bash
-chmod +x scripts/migrate-rippled-to-xrpld.sh
+chmod +x migrate-rippled-to-xrpld.sh
 
 # Preview every action without changing anything (recommended first):
-sudo ./scripts/migrate-rippled-to-xrpld.sh --dry-run
+sudo ./migrate-rippled-to-xrpld.sh --dry-run
 
 # Interactive run (prompts where it matters):
-sudo ./scripts/migrate-rippled-to-xrpld.sh
+sudo ./migrate-rippled-to-xrpld.sh
 
 # Non-interactive, e.g. a validator that re-syncs:
-sudo ./scripts/migrate-rippled-to-xrpld.sh --mode resync --yes
+sudo ./migrate-rippled-to-xrpld.sh --mode resync --yes
 ```
 
 ### Options
