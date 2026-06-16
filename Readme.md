@@ -37,9 +37,54 @@ matter:
 
 - Debian/Ubuntu (`apt`) or RHEL (`yum`) host
 - Root / `sudo`
-- The package-signing **GPG key already updated** (a prerequisite — the script
-  does *not* do this; see the upstream install guide)
 - `curl` (for the verify step and the `xrpld-info` helper)
+- The prerequisites below completed first
+
+## Prerequisites
+
+**The script does not set up the package repository or signing key — do this
+first, or Step 2 (`Install xrpld`) will fail with `Unable to locate package
+xrpld`.** Two things commonly need updating before `xrpld` is installable:
+
+1. **The repo suite must match your OS release.** Older installs often still
+   point at an outdated suite (e.g. `focal` on a host that's actually running
+   `noble`). The `xrpld` package is served per-release, so a mismatched suite
+   silently hides it. Check your release with `lsb_release -cs`.
+
+2. **The package-signing GPG key changed** (a new ed25519 key was published in
+   early 2026). The old key won't verify the new packages.
+
+### Debian / Ubuntu
+
+```bash
+# Install the current signing key
+sudo install -m 0755 -d /etc/apt/keyrings
+wget -qO- https://repos.ripple.com/repos/api/gpg/key/public | \
+  sudo gpg --dearmor -o /etc/apt/keyrings/ripple.gpg
+
+# Point apt at the repo for YOUR release (replace 'noble' with your
+# `lsb_release -cs` value if different — e.g. jammy, bookworm)
+echo "deb [signed-by=/etc/apt/keyrings/ripple.gpg] https://repos.ripple.com/repos/rippled-deb noble stable" | \
+  sudo tee /etc/apt/sources.list.d/ripple.list
+
+# Remove any stale older line if one exists, then refresh
+sudo apt-get update
+
+# Confirm xrpld is now offered (should show a 3.2.0 candidate)
+apt-cache policy xrpld
+```
+
+> If you had an old `ripple.list` pinned to a different suite, delete it first
+> (`sudo rm -f /etc/apt/sources.list.d/ripple.list`) so the two don't conflict.
+
+### RHEL
+
+On RHEL-based distros the package manager fetches the new key for you; ensure
+your `ripple.repo` points at the current repository. See the upstream install
+guide for the exact file contents.
+
+> Always verify the repository URL, suite, and key fingerprint against the
+> official XRPL install guide for your distro before running — these can change.
 
 ## Usage
 
