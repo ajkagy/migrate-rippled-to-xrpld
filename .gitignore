@@ -1,0 +1,21 @@
+# Backups & artifacts — never commit node identity, keys, or config copies.
+rippled-backup/
+*.tar.gz
+*.bak
+*.pre-migrate.bak
+
+# Secrets / identity
+*wallet.db
+validator-keys.json
+*.cfg
+!examples/*.cfg
+
+# Editor / OS noise
+*.swp
+*~
+.DS_Store
+.idea/
+.vscode/
+
+# Logs
+*.log
