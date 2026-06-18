@@ -283,7 +283,14 @@ step "Step 3 — Restore your server config into $NEW_CFG"
 if [ -f "$BACKUP_DIR/rippled.cfg" ]; then
   run mkdir -p "$(dirname "$NEW_CFG")"
   run cp -a "$BACKUP_DIR/rippled.cfg" "$NEW_CFG"
-  ok "Restored config -> $NEW_CFG"
+  # `cp -a` preserves the source's rippled:rippled ownership. The xrpld service
+  # runs as the xrpld user, which then cannot read its own config and aborts on
+  # start with: Failed to read '"/etc/xrpld/xrpld.cfg"'.13: Permission denied
+  # -> falls back to defaults -> 'Can not create "/etc/xrpld/db"' core-dump.
+  # Hand ownership to xrpld. Mode is left as-is (the cfg may hold a
+  # [validator_token], so it should stay restrictive, e.g. 0600).
+  run chown xrpld:xrpld "$NEW_CFG"
+  ok "Restored config -> $NEW_CFG (owned by xrpld:xrpld)"
 else
   die "Backup config not found at $BACKUP_DIR/rippled.cfg — cannot continue."
 fi
@@ -294,6 +301,8 @@ fi
 step "Step 4 — Restore validators.txt (if you keep one separately)"
 if [ -f "$BACKUP_DIR/validators.txt" ]; then
   run cp -a "$BACKUP_DIR/validators.txt" "$NEW_VALIDATORS"
+  # Same ownership fix as the cfg above so the xrpld user can read it.
+  run chown xrpld:xrpld "$NEW_VALIDATORS"
   ok "Restored validators.txt -> $NEW_VALIDATORS"
 else
   info "No separate validators.txt in backup."
